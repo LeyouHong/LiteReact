@@ -1,4 +1,4 @@
-import { REACT_ELEMENT, REACT_FORWARD_REF } from "./utils";
+import { REACT_ELEMENT, REACT_FORWARD_REF, toVNode } from "./utils";
 import { Component } from "./Component";
 
 function createElement(type, properties, children) {
@@ -13,9 +13,9 @@ function createElement(type, properties, children) {
 
   // 传入的子元素可能多余3个，把从第三个开始的都放进一个数组里
   if (arguments.length > 3) {
-    props.children = Array.prototype.slice.call(arguments, 2);
+    props.children = Array.prototype.slice.call(arguments, 2).map(toVNode);
   } else {
-    props.children = children;
+    props.children = toVNode(children);
   }
 
   return {
