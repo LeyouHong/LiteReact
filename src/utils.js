@@ -14,3 +14,42 @@ export const toVNode = (node) => {
       }
     : node;
 };
+export const deepClone = (data) => {
+  let type = getType(data);
+  let resultValue;
+  if (type !== "array" && type !== "object") {
+    return data;
+  }
+  if (type === "array") {
+    resultValue = [];
+    data.forEach((item) => {
+      resultValue.push(deepClone(item));
+    });
+    return resultValue;
+  }
+  if (type === "object") {
+    resultValue = {};
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        resultValue[key] = deepClone(data[key]);
+      }
+    }
+    return resultValue;
+  }
+};
+
+export const getType = (obj) => {
+  const typeMap = {
+    "[object String]": "string",
+    "[object Number]": "number",
+    "[object Boolean]": "boolean",
+    "[object Function]": "function",
+    "[object Array]": "array",
+    "[object Date]": "date",
+    "[object RegExp]": "regexp",
+    "[object Object]": "object",
+    "[object Null]": "null",
+    "[object Undefined]": "undefined",
+  };
+  return typeMap[Object.prototype.toString.call(obj)];
+};

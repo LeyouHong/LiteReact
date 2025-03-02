@@ -1,48 +1,53 @@
 import React from "./react";
 import ReactDOM from "./react-dom";
 
-class MyClassComponent extends React.Component {
-  isReset = false;
-  oldArr = ["A", "B", "C", "D", "E"];
-  newArr = ["C", "B", "E", "F", "A"];
+class DerivedState extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { arr: this.oldArr };
+    this.state = { prevUserId: "zhangsanfeng", email: "zhangsanfeng@qq.com" };
   }
 
-  updateShowArr() {
-    this.setState({ arr: this.isReset ? this.oldArr : this.newArr });
-    this.isReset = !this.isReset;
-    console.log(this.isReset);
+  static getDerivedStateFromProps(props, state) {
+    if (props.userId !== state.prevUserId) {
+      return {
+        prevUserId: props.userId,
+        email: props.userId + "@qq.com",
+      };
+    }
   }
 
   render() {
     return (
       <div>
-        <div
-          className="test-class"
-          style={{
-            color: "red",
-            cursor: "pointer",
-            border: "1px solid gray",
-            borderRadius: "5px",
-            display: "inline-block",
-            padding: "5px 10px",
-          }}
-          onClick={() => this.updateShowArr()}
-        >
-          Change The Text
-        </div>
-        <div>
-          {this.state.arr.map((item) => (
-            <div key={item}>{item}</div>
-          ))}
-        </div>
+        <h1>Email:</h1>
+        <h2>{this.state.email}</h2>
+      </div>
+    );
+  }
+}
+class ParentClass extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { id: "zhangsanfeng" };
+  }
+  changeUserId = () => {
+    this.setState({ id: "dongfangbubai" });
+  };
+
+  render() {
+    return (
+      <div>
+        <input
+          type="button"
+          value="click change UserId"
+          onClick={this.changeUserId}
+        />
+        <DerivedState userId={this.state.id} />
       </div>
     );
   }
 }
 
-ReactDOM.render(<MyClassComponent />, document.getElementById("root"));
+ReactDOM.render(<ParentClass />, document.getElementById("root"));
 
 // 生命周期的本质就是callback

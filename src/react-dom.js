@@ -81,6 +81,7 @@ function getDomByClassComponent(VNode) {
   const instance = new type(props);
   const renderVNode = instance.render();
   instance.oldVNode = renderVNode;
+  VNode.classInstance = instance;
   ref && (ref.current = instance);
 
   if (!renderVNode) return null;
@@ -207,7 +208,7 @@ function deepDOMDiff(oldVNode, newVNode) {
 
 function updateClassComponent(oldVNode, newVNode) {
   const classInstance = (newVNode.classInstance = oldVNode.classInstance);
-  classInstance.updater.launchUpdate();
+  classInstance.updater.launchUpdate(newVNode.props);
 }
 
 function updateFunctionComponent(oldVNode, newVNode) {

@@ -1,4 +1,5 @@
 import { findDomByVNode, updateDomTree } from "./react-dom";
+import { deepClone } from "./utils";
 
 // isBatch: false → 是否处于批量更新模式，用于标识当前是否需要合并更新。
 // updaters: new Set() → 存储所有需要更新的组件，Set 确保同一个组件不会重复执行更新。
@@ -31,19 +32,37 @@ class Updater {
       this.launchUpdate();
     }
   }
-  launchUpdate() {
+  launchUpdate(nextProps) {
     const { ClassComponentInstance, pendingStates } = this;
-    if (pendingStates.length === 0) {
+    if (pendingStates.length === 0 && !nextProps) {
       return;
     }
-    ClassComponentInstance.state = pendingStates.reduce(
-      (preState, newState) => {
-        return { ...preState, ...newState };
-      },
-      ClassComponentInstance.state
-    );
+
+    let isShouldUpdate = true;
+
+    const prevProps = deepClone(this.ClassComponentInstance.props);
+    const prevState = deepClone(this.ClassComponentInstance.state);
+
+    const nextState = this.pendingStates.reduce((preState, newState) => {
+      return { ...preState, ...newState };
+    }, ClassComponentInstance.state);
+
     this.pendingStates.length = 0;
-    ClassComponentInstance.update();
+    if (
+      ClassComponentInstance.shouldComponentUpdate &&
+      !ClassComponentInstance.shouldComponentUpdate(nextProps, nextState)
+    ) {
+      isShouldUpdate = false;
+    }
+
+    ClassComponentInstance.state = nextState;
+    if (nextProps) {
+      ClassComponentInstance.props = nextProps;
+    }
+
+    if (isShouldUpdate) {
+      ClassComponentInstance.update(prevProps, prevState);
+    }
   }
 }
 
@@ -68,13 +87,23 @@ export class Component {
     // 将真实dom挂载到页面上
     const oldVNode = this.oldVNode;
     const oldDOM = findDomByVNode(oldVNode);
+    if (this.constructor.getDerivedStateFromProps) {
+      let newState = this.constructor.getDerivedStateFromProps(
+        this.props,
+        this.state
+      );
+      this.state = { ...this.state, ...newState };
+    }
+    const snapshot =
+      this.getSnapshotBeforeUpdate &&
+      this.getSnapshotBeforeUpdate(prevProps, prevState);
     const newVNode = this.render();
     updateDomTree(oldVNode, newVNode, oldDOM);
     this.oldVNode = newVNode;
 
     // 实现componentDidUpdate
     if (this.componentDidUpdate) {
-      this.componentDidUpdate(this.props, this.state);
+      this.componentDidUpdate(this.props, this.state, snapshot);
     }
   }
 }
