@@ -44,3 +44,5 @@ class MyClassComponent extends React.Component {
 }
 
 ReactDOM.render(<MyClassComponent />, document.getElementById("root"));
+
+// 生命周期的本质就是callback

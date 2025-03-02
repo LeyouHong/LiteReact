@@ -16,6 +16,7 @@ function dispatchEvent(nativeEvent) {
   updaterQueue.isBatch = true;
   // 事件合成机制的核心点二：屏蔽浏览器之间的差异
   const syntheticEvent = createSyntheticEvent(nativeEvent);
+  // 这个nativeEvent的target不停向上冒泡执行事件函数
   let target = nativeEvent.target;
   // 在 dispatchEvent 里的 while 循环，主要的作用是 模拟事件冒泡，
   // 让事件能够从目标元素逐级向上传播（类似于原生 DOM 事件的冒泡机制）。

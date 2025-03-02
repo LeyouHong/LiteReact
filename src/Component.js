@@ -71,5 +71,10 @@ export class Component {
     const newVNode = this.render();
     updateDomTree(oldVNode, newVNode, oldDOM);
     this.oldVNode = newVNode;
+
+    // 实现componentDidUpdate
+    if (this.componentDidUpdate) {
+      this.componentDidUpdate(this.props, this.state);
+    }
   }
 }

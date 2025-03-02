@@ -82,13 +82,14 @@ function getDomByClassComponent(VNode) {
   const renderVNode = instance.render();
   instance.oldVNode = renderVNode;
   ref && (ref.current = instance);
-  // TODO: need delete start
-  //   setTimeout(() => {
-  //     instance.setState({ xxx: "66666666" });
-  //   }, 3000);
-  // TODO: need delete end
+
   if (!renderVNode) return null;
-  return createDOM(renderVNode);
+  const dom = createDOM(renderVNode);
+  // 实现componentDidMount
+  if (instance.componentDidMount) {
+    instance.componentDidMount();
+  }
+  return dom;
 }
 
 function mountArray(children, parent) {
@@ -160,6 +161,11 @@ export function updateDomTree(oldVNode, newVNode, oldDOM) {
 function removeVNode(VNode) {
   const currentDOM = findDomByVNode(VNode);
   if (currentDOM) currentDOM.remove();
+
+  // 实现类组件的componentWillUnmount
+  if (VNode.classInstance && VNode.classInstance.componentWillUnmount) {
+    VNode.classInstance.componentWillUnmount();
+  }
 }
 
 function deepDOMDiff(oldVNode, newVNode) {
