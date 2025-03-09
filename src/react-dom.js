@@ -8,11 +8,17 @@ import {
   shallowCompare,
 } from "./utils";
 import { addEvent } from "./event";
+import { resetHookIndex } from "./hooks";
+export let emitUpdateForHooks;
 
 function render(VNode, containerDom) {
   // 虚拟dom转化成真实dom
   // 将得到的真实dom挂载到containerDom里
   mount(VNode, containerDom);
+  emitUpdateForHooks = () => {
+    resetHookIndex();
+    updateDomTree(VNode, VNode, findDomByVNode(VNode));
+  };
 }
 
 function mount(VNode, containerDom) {
@@ -88,6 +94,7 @@ function getDomByFunctionComponent(VNode) {
   const { type, props } = VNode;
   let renderVNode = type(props);
   if (!renderVNode) return null;
+  VNode.oldRenderVNode = renderVNode;
   const dom = createDOM(renderVNode);
   VNode.dom = dom;
   return dom;
@@ -115,6 +122,10 @@ function mountArray(children, parent) {
     return;
   }
   for (let i = 0; i < children.length; i++) {
+    if (!children[i]) {
+      children.splice(i, 1);
+      continue;
+    }
     children[i].index = i;
     mount(children[i], parent);
   }
